@@ -28,14 +28,8 @@ export type TProductBase = Pick<IProductItem, 'id' | 'title' | 'price'>
 
 export type TCustomerInfo = Pick<ICustomerData, 'phone' | 'email' | 'address'>
 
-export type TBasketTotal = Pick<IBasket, 'total'>
-
-export type TBasketCounter = Pick<IBasket, 'counter'>
-
 export interface IBasket {
 	items: TProductBase[];
-	counter: number;
-	total: number;
 	add(product: TProductBase): void;
 	delete(productId: string): void;
 	clear(): void;
@@ -45,4 +39,8 @@ export interface ICatalog {
 	items: IProductItem[];
 	preview: string | null;
 	getItem(productId: string): IProductItem;
+}
+
+export interface IContent {
+    contentElement: HTMLElement;
 }

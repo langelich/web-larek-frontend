@@ -5,34 +5,24 @@ export interface IProductItem {
 	title: string;
 	category: string;
 	price: number;
-}
-
-export interface IProductList {
-	total: number;
-	items: IProductItem[];
-}
+} 
 
 export interface ICustomerData {
-	email: string
-	address: string
-	phone: string
-	payment: string
-}
-
-export interface ICustomer {
-	customerData: ICustomerData;
-	checkValidation(data: Record<keyof TCustomerInfo, string>): boolean;
+	email?: string
+	address?: string
+	phone?: string
+	payment?: string
 }
 
 export type TProductBase = Pick<IProductItem, 'id' | 'title' | 'price'>
 
-export type TCustomerInfo = Pick<ICustomerData, 'phone' | 'email' | 'address'>
-
 export interface IBasket {
 	items: TProductBase[];
+	isContain(productId: string): boolean;
 	add(product: TProductBase): void;
 	delete(productId: string): void;
 	clear(): void;
+	isContain(productId: string): void;
 }
 
 export interface ICatalog {
@@ -41,6 +31,11 @@ export interface ICatalog {
 	getItem(productId: string): IProductItem;
 }
 
-export interface IContent {
-    contentElement: HTMLElement;
+export type TOrder = ICustomerData & {
+	'items': string[];
+	'total': number;
+}
+
+export type TOrderResponse = Pick<TOrder, 'total'> & {
+	id: string;
 }

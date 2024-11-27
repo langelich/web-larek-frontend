@@ -1,3 +1,4 @@
+import { TProductBase } from "../types";
 import { cloneTemplate } from "../utils/utils"
 import { ContentStepByStep } from "./base/ContentStepByStep"
 import { IEvents } from "./base/events"
@@ -19,17 +20,19 @@ export class BasketView extends ContentStepByStep {
         this.events = events;
 
         this.modalButton.addEventListener('click', () => {
-            this.events.emit(`order:open`);
+            this.events.emit(`basketView:order`);
         })
     }
 
-    get contentElement() {
-        this.setActive();
-        return this._contentElement;
-    }
-
     set cardsList(cards: HTMLElement[]) {
-        this._cardsList.append(...cards);  
+        if (cards.length > 0) {
+            this._cardsList.replaceChildren(...cards);
+
+            cards.forEach((card, i) => {
+                const li = card.querySelector('.basket__item-index')
+                li.textContent = `${i + 1}`;
+            })
+        }
     }
 
     getCardsList() {
@@ -37,15 +40,19 @@ export class BasketView extends ContentStepByStep {
     }
 
     removeBasket() {
-        let li = this.getCardsList().querySelector('li');
-        li.parentNode.removeChild(li);
+        this._cardsList.childNodes.forEach(item => item.remove());
     }
 
     set total(value: number) {
         this._total.textContent = `${value} синапсов`;
+        this.setActive(value);
     }
 
-    setActive() {
-        (this._cardsList.childElementCount > 0) ? this.setValid(true) : this.setValid(false);
+    setActive(value: number) {
+        (value > 0) ? this.setValid(true) : this.setValid(false);
+    }
+
+    render(): HTMLElement {
+        return this._contentElement;
     }
 }

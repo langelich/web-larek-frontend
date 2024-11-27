@@ -1,47 +1,56 @@
 import { IEvents } from "../base/events";
 
 export interface IContent {
-    contentElement?: HTMLElement;
-    form?: HTMLFormElement;
+    contentElement: HTMLElement;
 }
 
 export class Modal {
     protected modalContainer: HTMLElement;
-    protected _modalContent: HTMLElement;
+    protected _contentElement: HTMLElement;
     protected modalClose: HTMLButtonElement
     protected events: IEvents;
 
     constructor (selector: string, events: IEvents) {
-        this.modalContainer = document.querySelector(selector) 
-        this._modalContent = this.modalContainer.querySelector('.modal__content');
+        this.modalContainer = document.querySelector(selector)
+        this._contentElement = this.modalContainer.querySelector('.modal__content');
         this.modalClose = this.modalContainer.querySelector('.modal__close');
         this.events = events;
 
         this.modalClose.addEventListener('click', () => this.close());
 
-        this.modalContainer.addEventListener('click', (evt) =>
-             (evt.currentTarget === evt.target) ? this.close() : {/* */} )     
-        
-        document.addEventListener('keydown', (evt) =>
-            (evt.key == "Escape") ? this.close() : {/* */} )     
+        const closeFunction = (function () {
+          this.close();
+        }).bind(this);
+
+        this.modalContainer.addEventListener('click', function (evt) {
+            if (evt.currentTarget === evt.target) {
+              closeFunction();
+            }
+        })
+
+        document.addEventListener('keydown', function (evt) {
+            if (evt.key == "Escape") {
+              closeFunction();
+            }
+          })
     }
 
-    set modalContent (element: HTMLElement) {
-        this._modalContent.replaceChildren(element);
+    set contentElement (value: HTMLElement) {
+      this._contentElement.replaceChildren(value);
     }
 
     open() {
         this.modalContainer.classList.add('modal_active');
         this.events.emit('мodal:open');
     }
-    
-	close() {
+
+	  close() {
         this.modalContainer.classList.remove('modal_active');
         this.events.emit('мodal:close');
     }
 
-    render(content: IContent): HTMLElement {
-        (content.contentElement) ? this.modalContent = content.contentElement : this.modalContent = content.form;
+    render(element: HTMLElement): HTMLElement {
+        this.contentElement = element;
         this.open();
         return this.modalContainer;
     }

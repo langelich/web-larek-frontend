@@ -2,7 +2,7 @@ import './scss/styles.scss';
 
 import { EventEmitter } from './components/base/events'
 import { ensureElement } from './utils/utils';
-import { IProductItem, TOrder, TProductBase } from './types';
+import { ICustomerData, IProductItem, TOrder, TProductBase } from './types';
 import { Basket } from './components/Basket';
 import { Catalog } from './components/Catalog';
 import { Api } from './components/base/api';
@@ -38,6 +38,7 @@ const modal = new Modal('#modal-container', events);
 
 const basketView = new BasketView('#basket', events);
 const cardPreview = new CardPreview('#card-preview', events);
+
 const contactForm = new ContactForm(contactTemplate, events);
 const orderForm = new OrderForm(orderTemplate, events);
 const success = new Success('#success', events);
@@ -47,17 +48,14 @@ events.on('catalog:added', (items: IProductItem[]) => {
     items.forEach(item => {
         const cardCatalog = new CardCatalog('#card-catalog', events);
 
-        cardCatalog.setData(item);
-        mainPage.gallery = [cardCatalog.contentElement];
+        mainPage.gallery = [cardCatalog.getContentElement(item)];
     })
-
-    mainPage.basketCounter = basket.items.length;
 })
 
 // "открыть корзину"
 events.on('basketView:open', () => {
-    basketView.contentElement;
-    modal.render(basketView)
+    basketView.total = basket.total;
+    modal.render(basketView.render())
 })
 
 // "открыть карточку"
@@ -66,96 +64,38 @@ events.on('card:open', (card: CardCatalog) => {
 })
 
 // Заполнить данными открытую карточку и отрендерить в модалке
-events.on('catalog:selected', (item: IProductItem) => {
-    larekApi.getProduct(item.id)
-        .then<IProductItem>((product) => {
-            cardPreview.setData(product);
-            modal.render(cardPreview);
+events.on('catalog:selected', (product: IProductItem) => {
+    modal.render(cardPreview.getContentElement(product));
 
-            if(basket.isContain(product.id)) {
-                cardPreview.button.textContent = 'Удалить из корзины'
-            } else {
-                cardPreview.button.textContent = 'В корзину'
-            }
-
-            return product;
-        })
-        .catch(err => {
-            console.error(err)  ;
-        });      
+    (basket.isContain(product.id)) ? cardPreview.setButton(true) : cardPreview.setButton(false);
 })
 
-// Изменения в корзине 
-events.on('basket:add', (product: TProductBase) => {
-    const cardBasket = new CardBasket('#card-basket', events);
+events.on('basket:change', (products: TProductBase[]) => {
 
-    cardBasket.setData(product);
-    basketView.cardsList = [cardBasket.contentElement];
-    cardBasket.quantity = basketView.getCardsList().childElementCount;
+    basketView.cardsList = products.map(product => {
+        const cardBasket = new CardBasket('#card-basket', events);
 
-    events.on('basket:delete', (product: {id: string}) => {
-        if (cardBasket.id === product.id) {
-            cardBasket.contentElement.remove();
-        }
-        basketView.total = basket.total;
-        cardBasket.quantity = basketView.getCardsList().childElementCount;
-
-        basketView.setActive();
-        mainPage.basketCounter = basket.items.length;  
-    })
+        return cardBasket.getContentElement(product);
+    });
 
     basketView.total = basket.total;
-    basketView.setActive();
     mainPage.basketCounter = basket.items.length;
 })
 
-
-// "удалить из корзины"
-events.on('card:delete', (card: {id: string}) => {
-    basket.delete(card.id);
-
-    cardPreview.id === card.id ? cardPreview.button.textContent = 'Удалить из корзины' : 
-        cardPreview.button.textContent = 'В корзину'
-})
-
-// Обработка добавления/удаления карточки
 events.on('card:change', (card: {id: string}) => {
-    const item: IProductItem = catalog.getItem(card.id);
-    
-    if(basket.isContain(card.id)) {
+    const product: IProductItem = catalog.getItem(card.id);
+    if (basket.isContain(product.id)) {
+        cardPreview.setButton(false);
         basket.delete(card.id);
     } else {
-        basket.add(item);
+        cardPreview.setButton(true);
+        basket.add(product);
     }
-})
-
-// Открыть форму заказа
-events.on('order:open', () => {
-    modal.render(orderForm);
-})
-
-// Открыть форму контактов
-events.on('contacts:open', () => {
-    modal.render(contactForm);
-})
-
-// Открыть форму успешно оформленного заказа
-events.on('success:open', () => {
-    modal.render(success);
-    success.total = basket.total;
 })
 
 // Закрыть форму успешного заказа
 events.on('success:close', () => {
     modal.close();
-
-    contactForm.email = '';
-    contactForm.phone = ''
-    orderForm.address = '';
-    basket.clear();
-    basketView.total = 0;
-    basketView.removeBasket();
-    mainPage.basketCounter = 0;
 })
 
 // Блокируем прокрутку страницы, если открыта модалка
@@ -169,27 +109,43 @@ events.on('мodal:close', () => {
 });
 
 // формирование заказа
-events.on('order:submit', (valueOrder: {payment: string, address: string}) => {
-    
-    events.on('contacts:submit', (valuContacts: {email: string, phone: string}) => {
+events.on('basketView:order', () => {
+    modal.render(orderForm.form);
+    basket.order.total = basket.total;
 
-        let items: Record<string, string[]> = {};
-        basket.items.forEach(item => {
-            return items["items"] = [item.id];
-        });
+    basket.items.forEach(item => {
+        if (!(item.price === null)) {
+            basket.order.items = [item.id];
+        };
+    });
+})
 
-        let total: Record<string, number> = {};
-        total['total'] = basket.total;
+events.on('order:click', (pay: {payment: string}) => {
+    orderForm.payment = pay.payment;
 
-        valueOrder.payment = 'online';
-        const orderObject: TOrder = Object.assign({}, valuContacts, valueOrder, items, total);
+    basket.order.payment = pay.payment;
+})
 
-        larekApi.createOrder(orderObject)
-            .then(result => result)
-            .catch(err => {
-                console.error(err);
-            });
+events.on(`order:submit`, (valueOrder: {address: string}) => {
+    modal.render(contactForm.form)
+    basket.order.address = valueOrder.address;
+})
+
+events.on(`contacts:submit`, (valueContacts: {email: string, phone: string}) => {
+    basket.order.email = valueContacts.email;
+    basket.order.phone = valueContacts.phone;
+
+    larekApi.createOrder(basket.order)
+        .then(result => {result
+            success.total = result.total;
+            modal.render(success.contentElement);
+            basketView.removeBasket();
+            basket.clear();
+            mainPage.basketCounter = basket.items.length;
         })
+        .catch(err => {
+            console.error(err);
+        });
 })
 
 // Загрузка карточек
@@ -198,5 +154,3 @@ larekApi.getProducts()
     .catch(err => {
         console.error(err);
     });
-    
-

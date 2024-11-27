@@ -23,10 +23,10 @@ export class Catalog implements ICatalog {
         if (!productId) {
             this._preview = null;
         }
-        let itemSelected = this.getItem(productId);
+        const itemSelected = this.getItem(productId);
         if (itemSelected) {
             this._preview = productId;
-            this.events.emit('catalog:selected', {id: this._preview} );
+            this.events.emit('catalog:selected', this.getItem(productId));
         }
     }
 

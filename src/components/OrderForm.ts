@@ -2,37 +2,33 @@ import { IEvents } from "./base/events";
 import { Form } from "./common/Form";
 
 
-export class OrderForm extends Form {        
-    protected button: NodeListOf<HTMLInputElement>
+export class OrderForm extends Form {
+    protected buttonCard: HTMLButtonElement;
+    protected buttonCash: HTMLButtonElement
 
     constructor (template: HTMLTemplateElement, events: IEvents) {
         super(template, events);
-        
-        this.button = this.form.querySelectorAll('.button_alt');
 
-        this.button[0].addEventListener('click', () => {
-            if (!this.button[0].classList.contains('button_alt-active')) {
-                this.button[0].classList.add('button_alt-active');
-                this.button[1].classList.remove('button_alt-active');
-            }
-        })
+        this.buttonCard = this._form.querySelector('[name=card]');
+        this.buttonCash = this._form.querySelector('[name=cash]');
 
-        this.button[1].addEventListener('click', () => {
-            if (!this.button[1].classList.contains('button_alt-active')) {
-                this.button[1].classList.add('button_alt-active');
-                this.button[0].classList.remove('button_alt-active');
-            }
-        })
+        this.buttonCard.addEventListener('click', () =>{
+          this.events.emit('order:click', {payment: this.buttonCard.name});
+        });
 
-        this.form.addEventListener('submit', (evt) => {
-            evt.preventDefault();
-            this.events.emit(`contacts:open`);
-            this.events.emit(`order:submit`, this.getInputValues());
-        })
+        this.buttonCash.addEventListener('click', () =>{
+          this.events.emit('order:click', {payment: this.buttonCash.name});
+        });
     }
 
     set payment (value: string) {
-        this.payment = value;
+        if (value === 'card')
+         {this.buttonCard.classList.add('button_alt-active');
+          this.buttonCash.classList.remove('button_alt-active');
+        }  else  {
+          this.buttonCash.classList.add('button_alt-active');
+          this.buttonCard.classList.remove('button_alt-active');
+        }
     }
 
     set address(value: string) {

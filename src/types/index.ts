@@ -5,7 +5,7 @@ export interface IProductItem {
 	title: string;
 	category: string;
 	price: number;
-} 
+}
 
 export interface ICustomerData {
 	email?: string
@@ -32,10 +32,10 @@ export interface ICatalog {
 }
 
 export type TOrder = ICustomerData & {
-	'items': string[];
-	'total': number;
+	items?: string[];
+	total?: number;
 }
 
 export type TOrderResponse = Pick<TOrder, 'total'> & {
-	id: string;
+	id?: string;
 }

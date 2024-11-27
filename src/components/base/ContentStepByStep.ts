@@ -1,6 +1,7 @@
 export abstract class ContentStepByStep {
+
     protected modalButton: HTMLButtonElement;
- 
+
     setValid (isValid: boolean) {
         if (!isValid) {
             this.modalButton.setAttribute('disabled', 'disabled');
@@ -8,6 +9,4 @@ export abstract class ContentStepByStep {
             this.modalButton.removeAttribute('disabled');
         }
     }
- }
- 
- 
+}

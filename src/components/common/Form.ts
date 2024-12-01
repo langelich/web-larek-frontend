@@ -22,21 +22,13 @@ export class Form extends ContentStepByStep{
         this.events = events;
 
         this._form.addEventListener('input', () => {
-            const valuesNot = Object.values(this.getInputValues()).filter(item => item.length === 0)
-            if (valuesNot.length === 0) {
-              this.hideError();
-              this.setValid(true);
-            } else {
-              this.showError();
-              this.setValid(false);
-            }
+            this.events.emit(`${this.formName}:change`, this.getInputValues());
         })
 
         this.form.addEventListener('submit', (evt) => {
             evt.preventDefault();
             this.events.emit(`${this.formName}:submit`, this.getInputValues());
-      })
-
+        })
     }
 
     getInputValues() {
@@ -48,23 +40,27 @@ export class Form extends ContentStepByStep{
         return valuesObject;
     }
 
-    setError(value: string) {
-        if (!value) {
-            this.showError();
+    setError(textError: string) {
+        if (textError) {
+            this.showError(textError);
         } else {
             this.hideError();
         }
     }
 
-    showError() {
-        this._formError.textContent = "Заполните все поля ввода";
+    protected showError(textError: string) {
+        this._formError.textContent = textError;
     }
 
-    hideError() {
-        this._formError.textContent = "";
+    protected hideError() {
+        this._formError.textContent = '';
     }
 
     get form() {
         return this._form;
     }
-  }
+
+    reset() {
+        this._form.reset();
+    }
+}

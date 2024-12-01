@@ -2,8 +2,8 @@ import { ICatalog, IProductItem } from '../types';
 import { IEvents } from './base/events'
 
 export class Catalog implements ICatalog {
-	protected _items: IProductItem[];
-	protected _preview: string | null;
+    protected _items: IProductItem[];
+    protected _preview: string | null;
     protected events: IEvents;
 
     constructor (events: IEvents) {

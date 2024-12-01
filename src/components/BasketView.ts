@@ -1,5 +1,5 @@
 import { TProductBase } from "../types";
-import { cloneTemplate } from "../utils/utils"
+import { cloneTemplate, createElement } from "../utils/utils"
 import { ContentStepByStep } from "./base/ContentStepByStep"
 import { IEvents } from "./base/events"
 
@@ -20,7 +20,7 @@ export class BasketView extends ContentStepByStep {
         this.events = events;
 
         this.modalButton.addEventListener('click', () => {
-            this.events.emit(`basketView:order`);
+            this.events.emit(`orderForm:open`);
         })
     }
 
@@ -32,6 +32,10 @@ export class BasketView extends ContentStepByStep {
                 const li = card.querySelector('.basket__item-index')
                 li.textContent = `${i + 1}`;
             })
+        } else {
+            this._cardsList.replaceChildren(createElement<HTMLParagraphElement>('p', {
+                textContent: 'Корзина пуста'
+            }));
         }
     }
 

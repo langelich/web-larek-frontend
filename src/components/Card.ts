@@ -99,8 +99,16 @@ export class CardPreview extends Card {
         this.category.classList.add(`card__category${color}`);
     }
 
+    removeCategoryColor() {
+        const classes = this.category.className.split(" ").filter(category => {
+            return category.lastIndexOf('card__category_', 0) !== 0;
+        });
+        this.category.className = classes.join(" ").trim();
+    }
+
     setData(cardData: Partial<IProductItem>) {
         super.setData(cardData)
+        this.removeCategoryColor();
 
         this.category.textContent = cardData.category;
         this.description.textContent = cardData.description;

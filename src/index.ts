@@ -15,6 +15,7 @@ import { CardBasket, CardCatalog, CardPreview } from './components/Card';
 import { ContactForm } from './components/ContactForm';
 import { OrderForm } from './components/OrderForm';
 import { Success } from './components/Success';
+import { Customer } from './components/Customer';
 
 const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
 const contactTemplate = ensureElement<HTMLTemplateElement>('#contacts');
@@ -38,7 +39,7 @@ const modal = new Modal('#modal-container', events);
 
 const basketView = new BasketView('#basket', events);
 const cardPreview = new CardPreview('#card-preview', events);
-
+const customer = new Customer(events);
 const contactForm = new ContactForm(contactTemplate, events);
 const orderForm = new OrderForm(orderTemplate, events);
 const success = new Success('#success', events);
@@ -54,7 +55,6 @@ events.on('catalog:added', (items: IProductItem[]) => {
 
 // "открыть корзину"
 events.on('basketView:open', () => {
-    basketView.total = basket.total;
     modal.render(basketView.render())
 })
 
@@ -71,6 +71,7 @@ events.on('catalog:selected', (product: IProductItem) => {
 })
 
 events.on('basket:change', (products: TProductBase[]) => {
+    mainPage.basketCounter = basket.items.length;
 
     basketView.cardsList = products.map(product => {
         const cardBasket = new CardBasket('#card-basket', events);
@@ -79,7 +80,6 @@ events.on('basket:change', (products: TProductBase[]) => {
     });
 
     basketView.total = basket.total;
-    mainPage.basketCounter = basket.items.length;
 })
 
 events.on('card:change', (card: {id: string}) => {
@@ -108,40 +108,62 @@ events.on('мodal:close', () => {
     mainPage.locked = false;
 });
 
-// формирование заказа
-events.on('basketView:order', () => {
+// открыть форму order
+events.on('orderForm:open', () => {
     modal.render(orderForm.form);
-    basket.order.total = basket.total;
-
-    basket.items.forEach(item => {
-        if (!(item.price === null)) {
-            basket.order.items = [item.id];
-        };
-    });
 })
 
-events.on('order:click', (pay: {payment: string}) => {
-    orderForm.payment = pay.payment;
-
-    basket.order.payment = pay.payment;
+// меняются данные формы order
+events.on('order:change', (orderValues: Record<keyof ICustomerData, string>) => {
+    customer.checkValidation(orderValues);
 })
 
-events.on(`order:submit`, (valueOrder: {address: string}) => {
-    modal.render(contactForm.form)
-    basket.order.address = valueOrder.address;
+// меняются данные формы contact
+events.on('contacts:change', (contactsValues: Record<keyof ICustomerData, string>) => {
+    customer.checkValidation(contactsValues);
 })
 
-events.on(`contacts:submit`, (valueContacts: {email: string, phone: string}) => {
-    basket.order.email = valueContacts.email;
-    basket.order.phone = valueContacts.phone;
+// валидация
+events.on('customer:validation', (data : {errorsObject: Partial<ICustomerData>}) => {
+    const { address, email, phone, payment } = data.errorsObject;
 
-    larekApi.createOrder(basket.order)
+    orderForm.setValid(!data.errorsObject.address && !data.errorsObject.payment)
+    orderForm.setError(Object.values({ address, payment }).filter(item => !!item).join('; '))
+
+    contactForm.setValid(!data.errorsObject.email && !data.errorsObject.phone)
+    contactForm.setError(Object.values({ email, phone }).filter(item => !!item).join('; '))
+})
+
+// сабмит формы order
+events.on('order:submit', (orderValues: Record<keyof ICustomerData, string>) => {
+    modal.render(contactForm.form);
+    customer.setCustomerData(orderValues);
+})
+
+// отправка заказа
+events.on('contacts:submit', (contactsValues: Record<keyof ICustomerData, string>) => {
+    customer.setCustomerData(contactsValues);
+
+    const order: TOrder = {
+        payment: customer.customerData.payment,
+        address: customer.customerData.address,
+        phone: customer.customerData.phone,
+        email: customer.customerData.email,
+        items: basket.items.map(item => {
+            if (!(item.price === null)) {
+                return item.id;
+            }
+        }).filter(Boolean),
+        total: basket.total
+    };
+
+    larekApi.createOrder(order)
         .then(result => {result
-            success.total = result.total;
-            modal.render(success.contentElement);
-            basketView.removeBasket();
-            basket.clear();
-            mainPage.basketCounter = basket.items.length;
+              success.total = result.total;
+              modal.render(success.contentElement);
+              basket.clear();
+              orderForm.reset();
+              contactForm.reset();
         })
         .catch(err => {
             console.error(err);

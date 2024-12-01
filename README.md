@@ -59,11 +59,11 @@ export interface IProductItem {
 
 Данные покупателя
 ```
-export interface ICustomer {
-	email?: string
-	address?: string
-	phone?: string
-	payment?: string
+export interface ICustomerData {
+	email: string;
+	address: string;
+	phone: string;
+	payment: string;
 }
 ```
 
@@ -143,7 +143,6 @@ export type TOrderResponse = Pick<TOrder, 'total'> & {
 В полях класса хранятся следующие данные:
 - `_items: TProductBase[]` - массив товаров в корзине;
 - `events: IEvents` - брокер событий;
-- `protected _order: Partial<TOrder>` - данные заказа;
 
 Набор методов для взаимодействия с этими данными:
 - `add(product: TProductBase): void` - добавляет товар в корзину и вызывает событие изменения состава корзины;
@@ -165,6 +164,18 @@ export type TOrderResponse = Pick<TOrder, 'total'> & {
 Методы:
 - `getItem(productId: string): IProductItem` - возвращает товар по его id;
 - геттеры для получения данных из полей класса и сеттеры для их сохранения.
+
+#### Класс Customer
+Хранит данные покупателя в виде объекта `ICustomerData`: почта, адрес, телефон и способ оплаты. В конструктор принимает экземпляр класса `EventEmitter` для инициации событий при изменении данных. Отвечает за валидацию введенных данных.\
+
+Поля класса:
+- `_customerData: ICustomerData` - объект с данными покупателя;
+- `events: IEvents` - брокер событий;
+
+Методы:
+- `checkValidation(data: Record<keyof TCustomerInfo, string>): boolean` - проверяет валидность ввведеных данных;
+- `get customerData(): ICustomerData` - получает данные покупателя в виде пар 'ключ - значение';
+- `setCustomerData(data: Record<keyof ICustomerData, string>): void` - меняет данные покупателя;
 
 
 ### Слой представления
@@ -199,6 +210,7 @@ export interface IContent {
 Методы:
 - `setValid (isValid: boolean): void` - изменяет активность кнопки перехода к следующему шагу;
 
+
 #### Класс BasketView
 Расширяет абстрактный класс `ContentStepByStep`.\
 Отвечает за отображение корзины. Конструктор - `(selector: string, events: IEvents)` - принимает селектор для идентификации элемента и экземпляр класса `EventEmitter`.
@@ -225,18 +237,19 @@ export interface IContent {
 Поля:
 - `modalActions: HTMLElement` - элемент с кнопкой сабмита и элементом ошибки(для поиска кнопки сабмита)
 - `form: HTMLFormElement` - элемент формы;
-- `protected formName: string` - имя формы;
+- `formName: string` - имя формы;
 - `inputs: NodeListOf<HTMLInputElement>` - инпуты;
 - `_formError: HTMLElement` - элемент для вывода ошибки под формой;
 - `modalButton: HTMLButtonElement` - кнопка перехода к следующему шагу;
 - `events: IEvents` - брокер событий;
 
 Методы:
-- `getInputValues(): Record<string, string>` - получает значение инпута и его имя в виде объекта;
+- `getInputValues(): Record<string, string>` - получает имя инпута и его значение в виде объекта;
 - `setError(value: string): void` - управляет отображением текста с ошибкой;
 - `showError(): void` - отображает текст ошибки под формой;
 - `hideError(): void` - скрывает текст ошибки;
 - `get form(): HTMLFormElement` - геттер для получения элемента формы;
+- `reset(): void` - сброс данных формы;
 
 
 #### Класс OrderForm
@@ -244,12 +257,15 @@ export interface IContent {
 В конструктор принимает параметры, которые необходимы для родительского класса `Form`. Устанавливаются слушатели на кнопки выпора способа оплаты.
 
 Поля:
-- `protected buttonCard: HTMLButtonElement` - кнопка с именем card;
-- `protected buttonCash: HTMLButtonElement` - кнопка с именем cash;
+- ` buttonCard: HTMLButtonElement` - кнопка с именем card;
+- ` buttonCash: HTMLButtonElement` - кнопка с именем cash;
+- `button: NodeListOf<HTMLButtonElement>` - все кнопки для выбора способа оплаты;
 
 Методы:
 - `set payment (value: string): string` - отображает выбранное значение для способа оплаты;
 - `set address (value: string): string` - устанавливает адрес доставки;
+- `getInputValues(): Record<string, string>` - расширяет метод родительского класса, добавляя значение выбранного способа оплаты;
+- `reset(): void` - расширяет метод родительского класса, сбрасывая значение выбранного способа оплаты;
 
 
 #### Класс ContactForm
@@ -305,6 +321,7 @@ export interface IContent {
 - `setButton(isClicked: boolean): void ` - устанавливает значение кнопки Удалить из корзины/В корзину в зависимости от полученного в параметрах true/false;
 - `set categoryColor(color: string) ` - дополняет метод родительского класса;
 - `setData(cardData: Partial<IProductItem>): void` - дополняет метод родительского класса;
+- `removeCategoryColor(): void` - удаляет класс категории предыдущей открытой карточки;
 
 
 #### Класс CardBasket
@@ -365,15 +382,16 @@ export interface IContent {
 - `catalog:selected` - изменение данных о товаре, который открывается в модальном окне
 
 *События, вызванные взаимодействием пользователя с интерфейсом (генерируются классами представления):*
-- `order:click` - сохранение способа оплаты модального окна с формой выбора способа оплаты и адреса доставки
-- `contacts:open` - открытие модального окна с формой ввода контактов
+- `order:submit` - сохранение способа оплаты и адреса доставки и открытие формы contacts
 - `basketView:open` - открытие модального окна корзины
-- `basketView:order` - открытие мод. окна с формой Order и сохранение данных для заказа(id и total)
 - `basket:change` - изменения в корзине
 - `success:close` - закрытие модального окна с успешно оформленным заказом
 - `card:open` - открытие модального окна с подробным описанием товара
 - `card:change` - добавление/удаление карточки
-- `order:submit` - открытие мод. окна Order и сохранение адреса доставки
-- `contacts:submit` - отправка данных с заказом на сервер
+- `contacts:submit` - сохранение данных формы contacts и отправка сформированного заказа на сервер
+- `customer:validation` - валидация введенных данных
+- `contacts:change` - изменение введенных данных в форме contacts
+- `order:change` - изменение введенных данных в форме order
+- `orderForm:open` - открытие модального окна с формой order
 - `мodal:open` - открытие любого модального окна
 - `мodal:close` - закрытие любого модального окна

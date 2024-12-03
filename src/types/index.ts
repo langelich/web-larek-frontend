@@ -16,8 +16,9 @@ export interface ICustomerData {
 
 export interface ICustomer {
     customerData: ICustomerData;
-    checkValidation(data: Record<keyof ICustomerData, string>): boolean;
-    // setCustomerData(data: Record<keyof ICustomerData, string>): void;
+    checkValidation(): boolean;
+    setOrderData(data: Partial<ICustomerData>): void;
+    setContactsData(data: Partial<ICustomerData>): void;
 }
 
 export type TProductBase = Pick<IProductItem, 'id' | 'title' | 'price'>

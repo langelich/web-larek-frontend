@@ -115,7 +115,7 @@ export type TOrderResponse = Pick<TOrder, 'total'> & {
 2. Презентер обрабатывает событие `card:open` и передает данные id карточки в модель данных.
 3. Класс `Catalog` изменяет данные и генерирует событие `catalog:selected`
 4. Презентер обрабатывает событие `catalog:selected` и вызывает метод `getContentElement(cardData: Partial<IProductItem>): HTMLElement` класса `Card`
-5. Класс отображения `Modal` принимает в метод `render(element: HTMLElement): HTMLElement` полученную карточку с данными выбранного товара и отображает о модальном окне подробную информацию.
+5. Класс отображения `Modal` принимает в метод `render(element: HTMLElement): HTMLElement` полученную карточку с данными выбранного товара и отображает в модальном окне подробную информацию.
 
 ### Базовый код
 
@@ -175,7 +175,8 @@ export type TOrderResponse = Pick<TOrder, 'total'> & {
 Методы:
 - `checkValidation(data: Record<keyof TCustomerInfo, string>): boolean` - проверяет валидность ввведеных данных;
 - `get customerData(): ICustomerData` - получает данные покупателя в виде пар 'ключ - значение';
-- `setCustomerData(data: Record<keyof ICustomerData, string>): void` - меняет данные покупателя;
+- `setOrderData(data: Partial<ICustomerData>) : void` - меняет данные покупателя формы Order;
+- `setContactsData(data: Partial<ICustomerData>) : void` - меняет данные покупателя формы Contacts;
 
 
 ### Слой представления
@@ -228,6 +229,7 @@ export interface IContent {
 - `getCardsList(): HTMLUListElement ` - получает элементы карточки в корзине
 -  `set total(value: number): number` - устанавливает сумму корзины;
 - `setActive(): void` - проверяет наличие элементов карточки в корзине для изменения активности кнопки;
+- `removeBasket(): void` - очищает корзину
 
 
 #### Класс Form
@@ -249,12 +251,11 @@ export interface IContent {
 - `showError(): void` - отображает текст ошибки под формой;
 - `hideError(): void` - скрывает текст ошибки;
 - `get form(): HTMLFormElement` - геттер для получения элемента формы;
-- `reset(): void` - сброс данных формы;
 
 
 #### Класс OrderForm
 Отвечает за отображение формы с именем `order`, наследуя класс `Form`.\
-В конструктор принимает параметры, которые необходимы для родительского класса `Form`. Устанавливаются слушатели на кнопки выпора способа оплаты.
+В конструктор принимает параметры, которые необходимы для родительского класса `Form`. Устанавливаются слушатели на кнопки выбора способа оплаты.
 
 Поля:
 - ` buttonCard: HTMLButtonElement` - кнопка с именем card;
@@ -264,8 +265,6 @@ export interface IContent {
 Методы:
 - `set payment (value: string): string` - отображает выбранное значение для способа оплаты;
 - `set address (value: string): string` - устанавливает адрес доставки;
-- `getInputValues(): Record<string, string>` - расширяет метод родительского класса, добавляя значение выбранного способа оплаты;
-- `reset(): void` - расширяет метод родительского класса, сбрасывая значение выбранного способа оплаты;
 
 
 #### Класс ContactForm
@@ -382,16 +381,19 @@ export interface IContent {
 - `catalog:selected` - изменение данных о товаре, который открывается в модальном окне
 
 *События, вызванные взаимодействием пользователя с интерфейсом (генерируются классами представления):*
-- `order:submit` - сохранение способа оплаты и адреса доставки и открытие формы contacts
+- `order:submit` - открытие формы contacts
 - `basketView:open` - открытие модального окна корзины
 - `basket:change` - изменения в корзине
 - `success:close` - закрытие модального окна с успешно оформленным заказом
 - `card:open` - открытие модального окна с подробным описанием товара
 - `card:change` - добавление/удаление карточки
-- `contacts:submit` - сохранение данных формы contacts и отправка сформированного заказа на сервер
+- `contacts:submit` - отправка сформированного заказа на сервер
 - `customer:validation` - валидация введенных данных
 - `contacts:change` - изменение введенных данных в форме contacts
 - `order:change` - изменение введенных данных в форме order
 - `orderForm:open` - открытие модального окна с формой order
 - `мodal:open` - открытие любого модального окна
 - `мodal:close` - закрытие любого модального окна
+- `customerOrder:ready` - данные формы order сохранены
+- `customerContacts:ready` - данные формы contacts сохранены
+

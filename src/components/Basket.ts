@@ -19,9 +19,7 @@ export class Basket implements IBasket {
     }
 
     get total () {
-        const prices = this._items.map(item => item.price);
-        const sum = prices.reduce((prevPrice, currentPrice) => prevPrice + currentPrice, 0);
-        return sum;
+        return this._items.reduce((total, currentItem) => total + currentItem.price, 0);
     }
 
     isContain(productId: string) {

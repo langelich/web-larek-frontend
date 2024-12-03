@@ -19,7 +19,7 @@ export class Modal {
         this.modalClose.addEventListener('click', () => this.close());
 
         const closeFunction = (function () {
-          this.close();
+            this.close();
         }).bind(this);
 
         this.modalContainer.addEventListener('click', function (evt) {

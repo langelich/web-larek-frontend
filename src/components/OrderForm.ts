@@ -1,7 +1,6 @@
 import { IEvents } from "./base/events";
 import { Form } from "./common/Form";
 
-
 export class OrderForm extends Form {
     protected buttonCard: HTMLButtonElement;
     protected buttonCash: HTMLButtonElement;
@@ -14,33 +13,20 @@ export class OrderForm extends Form {
         this.buttonCash = this._form.querySelector('[name=cash]');
         this.button = this._form.querySelectorAll('.button_alt');
 
-        this.buttonCard.addEventListener('click', () => {
-            this.payment = 'card';
-            this.events.emit('order:change', this.getInputValues())
-        });
-
-        this.buttonCash.addEventListener('click', () => {
-            this.payment = 'cash';
-            this.events.emit('order:change', this.getInputValues())
-        });
-    }
-
-    getInputValues(): Record<string, string> {
-        const valuesObject = super.getInputValues();
-
         this.button.forEach(item => {
-            if (item.classList.contains('button_alt-active')) {
-                valuesObject['payment'] = item.name;
-            }
+            item.addEventListener('click', () => {
+                this.payment = item.name;
+                this.events.emit('order:change', {payment: item.name})
+            })
         })
-        return valuesObject;
     }
 
     set payment (value: string) {
         if (value === 'card') {
             this.buttonCard.classList.add('button_alt-active');
             this.buttonCash.classList.remove('button_alt-active');
-        }  else  {
+
+        } else if (value === 'cash'){
             this.buttonCash.classList.add('button_alt-active');
             this.buttonCard.classList.remove('button_alt-active');
         }
@@ -48,10 +34,5 @@ export class OrderForm extends Form {
 
     set address(value: string) {
         (this.form.elements.namedItem('address') as HTMLInputElement).value = value;
-    }
-
-    reset() {
-        super.reset();
-        this.button.forEach(item => item.classList.remove('button_alt-active'));
     }
 }

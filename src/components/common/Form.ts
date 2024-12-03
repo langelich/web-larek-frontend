@@ -25,7 +25,7 @@ export class Form extends ContentStepByStep{
             this.events.emit(`${this.formName}:change`, this.getInputValues());
         })
 
-        this.form.addEventListener('submit', (evt) => {
+        this._form.addEventListener('submit', (evt) => {
             evt.preventDefault();
             this.events.emit(`${this.formName}:submit`, this.getInputValues());
         })
@@ -58,9 +58,5 @@ export class Form extends ContentStepByStep{
 
     get form() {
         return this._form;
-    }
-
-    reset() {
-        this._form.reset();
     }
 }

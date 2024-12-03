@@ -29,19 +29,19 @@ export class Basket implements IBasket {
         return (this._items.includes(itemChecked));
     }
 
-	  add (product: TProductBase) {
+    add (product: TProductBase) {
         this._items.push(product);
         this.events.emit('basket:change', this.items);
     }
 
-	  delete (productId: string) {
+    delete (productId: string) {
         const deleteItem = this._items.find(item => item['id'] === productId);
         const indexDeleteItem = this._items.indexOf(deleteItem);
         this._items.splice(indexDeleteItem, 1);
         this.events.emit('basket:change', this.items);
     }
 
-	  clear () {
+    clear () {
         this._items.splice(0, this._items.length);
         this.events.emit('basket:change', this.items);
     }

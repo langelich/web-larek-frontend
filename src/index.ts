@@ -115,35 +115,33 @@ events.on('orderForm:open', () => {
 
 // меняются данные формы order
 events.on('order:change', (orderValues: Record<keyof ICustomerData, string>) => {
-    customer.checkValidation(orderValues);
+    customer.setOrderData(orderValues);
+
 })
 
 // меняются данные формы contact
 events.on('contacts:change', (contactsValues: Record<keyof ICustomerData, string>) => {
-    customer.checkValidation(contactsValues);
+    customer.setContactsData(contactsValues);
 })
 
 // валидация
-events.on('customer:validation', (data : {errorsObject: Partial<ICustomerData>}) => {
-    const { address, email, phone, payment } = data.errorsObject;
+events.on('customer:validation', (data: Record<keyof ICustomerData, string>) => {
+    const { address, email, phone, payment } = data;
 
-    orderForm.setValid(!data.errorsObject.address && !data.errorsObject.payment)
+    orderForm.setValid(!data.address && !data.payment)
     orderForm.setError(Object.values({ address, payment }).filter(item => !!item).join('; '))
 
-    contactForm.setValid(!data.errorsObject.email && !data.errorsObject.phone)
+    contactForm.setValid(!data.email && !data.phone)
     contactForm.setError(Object.values({ email, phone }).filter(item => !!item).join('; '))
 })
 
 // сабмит формы order
-events.on('order:submit', (orderValues: Record<keyof ICustomerData, string>) => {
+events.on('order:submit', () => {
     modal.render(contactForm.form);
-    customer.setCustomerData(orderValues);
 })
 
 // отправка заказа
-events.on('contacts:submit', (contactsValues: Record<keyof ICustomerData, string>) => {
-    customer.setCustomerData(contactsValues);
-
+events.on('contacts:submit', () => {
     const order: TOrder = {
         payment: customer.customerData.payment,
         address: customer.customerData.address,
@@ -162,8 +160,6 @@ events.on('contacts:submit', (contactsValues: Record<keyof ICustomerData, string
               success.total = result.total;
               modal.render(success.contentElement);
               basket.clear();
-              orderForm.reset();
-              contactForm.reset();
         })
         .catch(err => {
             console.error(err);

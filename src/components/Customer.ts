@@ -19,16 +19,16 @@ export class Customer implements ICustomer {
         const errors: typeof this.errorsObject = {};
 
         if (!this.customerData.address) {
-          errors.address = 'Укажите адрес доставки';
+            errors.address = 'Укажите адрес доставки';
         }
         if (!this.customerData.payment) {
-          errors.payment = 'Выберите способ оплаты';
+            errors.payment = 'Выберите способ оплаты';
         }
         if  (!this.customerData.email) {
-          errors.email = 'Укажите email';
+            errors.email = 'Укажите email';
         }
         if (!this.customerData.phone)  {
-          errors.phone = 'Укажите номер телефона';
+            errors.phone = 'Укажите номер телефона';
         }
 
         this.errorsObject = errors;

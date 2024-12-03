@@ -24,19 +24,19 @@ export class Modal {
 
         this.modalContainer.addEventListener('click', function (evt) {
             if (evt.currentTarget === evt.target) {
-              closeFunction();
+              	closeFunction();
             }
         })
 
         document.addEventListener('keydown', function (evt) {
             if (evt.key == "Escape") {
-              closeFunction();
+              	closeFunction();
             }
-          })
+        })
     }
 
     set contentElement (value: HTMLElement) {
-      this._contentElement.replaceChildren(value);
+	this._contentElement.replaceChildren(value);
     }
 
     open() {
@@ -44,7 +44,7 @@ export class Modal {
         this.events.emit('мodal:open');
     }
 
-	  close() {
+    close() {
         this.modalContainer.classList.remove('modal_active');
         this.events.emit('мodal:close');
     }

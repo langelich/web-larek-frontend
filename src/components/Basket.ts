@@ -2,7 +2,7 @@ import { IBasket, TOrder, TProductBase } from '../types';
 import { IEvents } from './base/events'
 
 export class Basket implements IBasket {
-	  protected _items: TProductBase[];
+    protected _items: TProductBase[];
     protected events: IEvents;
 
     constructor (events: IEvents) {

@@ -30,7 +30,7 @@ export class Catalog implements ICatalog {
         }
     }
 
-	getItem (productId: string) {
+    getItem (productId: string) {
         return this._items.find(item => item['id'] === productId);
     }
 }

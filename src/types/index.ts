@@ -44,5 +44,5 @@ export type TOrder = ICustomerData & {
 }
 
 export type TOrderResponse = Pick<TOrder, 'total'> & {
-	  id: string;
+    id: string;
 }

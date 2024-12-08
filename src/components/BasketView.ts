@@ -36,6 +36,7 @@ export class BasketView extends ContentStepByStep {
             this._cardsList.replaceChildren(createElement<HTMLParagraphElement>('p', {
                 textContent: 'Корзина пуста'
             }));
+            this.setActive(cards.length);
         }
     }
 

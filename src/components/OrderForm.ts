@@ -15,7 +15,6 @@ export class OrderForm extends Form {
 
         this.button.forEach(item => {
             item.addEventListener('click', () => {
-                this.payment = item.name;
                 this.events.emit('order:change', {payment: item.name})
             })
         })
@@ -25,7 +24,6 @@ export class OrderForm extends Form {
         if (value === 'card') {
             this.buttonCard.classList.add('button_alt-active');
             this.buttonCash.classList.remove('button_alt-active');
-
         } else if (value === 'cash'){
             this.buttonCash.classList.add('button_alt-active');
             this.buttonCard.classList.remove('button_alt-active');

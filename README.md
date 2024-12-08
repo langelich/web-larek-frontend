@@ -379,6 +379,9 @@ export interface IContent {
 - `catalog:added` - получены карточки с сервера;
 - `basket:change` - изменение массива товаров;
 - `catalog:selected` - изменение данных о товаре, который открывается в модальном окне
+- `customerOrder:ready` - данные формы order сохранены
+- `customerContacts:ready` - данные формы contacts сохранены
+- `payment:change` - изменен способ оплаты
 
 *События, вызванные взаимодействием пользователя с интерфейсом (генерируются классами представления):*
 - `order:submit` - открытие формы contacts
@@ -394,6 +397,3 @@ export interface IContent {
 - `orderForm:open` - открытие модального окна с формой order
 - `мodal:open` - открытие любого модального окна
 - `мodal:close` - закрытие любого модального окна
-- `customerOrder:ready` - данные формы order сохранены
-- `customerContacts:ready` - данные формы contacts сохранены
-

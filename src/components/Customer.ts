@@ -43,6 +43,7 @@ export class Customer implements ICustomer {
     setOrderData(data: Partial<ICustomerData>) {
         if (data.payment) {
             this._customerData.payment = data.payment;
+            this.events.emit('payment:change', data);
         } else {
             this._customerData.address = data.address;
         }

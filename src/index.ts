@@ -51,11 +51,13 @@ events.on('catalog:added', (items: IProductItem[]) => {
 
         mainPage.gallery = [cardCatalog.getContentElement(item)];
     })
+    basketView.cardsList = [];
 })
 
 // "открыть корзину"
 events.on('basketView:open', () => {
-    modal.render(basketView.render())
+    modal.render(basketView.render());
+    // basketView.cardsList = [];
 })
 
 // "открыть карточку"
@@ -116,12 +118,16 @@ events.on('orderForm:open', () => {
 // меняются данные формы order
 events.on('order:change', (orderValues: Record<keyof ICustomerData, string>) => {
     customer.setOrderData(orderValues);
-
 })
 
 // меняются данные формы contact
 events.on('contacts:change', (contactsValues: Record<keyof ICustomerData, string>) => {
     customer.setContactsData(contactsValues);
+})
+
+// меняется отображение кнопок для выбора способа оплаты
+events.on('payment:change', (data: Partial<ICustomerData>) => {
+    orderForm.payment = data.payment;
 })
 
 // валидация

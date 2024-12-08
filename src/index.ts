@@ -57,7 +57,6 @@ events.on('catalog:added', (items: IProductItem[]) => {
 // "открыть корзину"
 events.on('basketView:open', () => {
     modal.render(basketView.render());
-    // basketView.cardsList = [];
 })
 
 // "открыть карточку"
